@@ -15,5 +15,11 @@
   "bugs": {
     "url": "https://github.com/chetanbasuray/url-shortner/issues"
   },
-  "homepage": "https://github.com/chetanbasuray/url-shortner#readme"
+  "homepage": "https://github.com/chetanbasuray/url-shortner#readme",
+  "dependencies": {
+    "node-fetch": "^2.6.1"
+  },
+  "devDependencies": {
+    "jest": "^26.4.2"
+  }
 }
