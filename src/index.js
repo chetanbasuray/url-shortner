@@ -1,4 +1,5 @@
 const tinyUrl = require('./Recipes/tinyurl');
+const bitly = require('./Recipes/bitly');
 
 /**
  *
@@ -9,6 +10,8 @@ const tinyUrl = require('./Recipes/tinyurl');
 async function handleRequest(url, source) {
     if(source.includes('tinyurl')) {
         return await tinyUrl.convert(url);
+    } else if(source.includes('bitly')) {
+        return await bitly.convert(url);
     }
 }
 
