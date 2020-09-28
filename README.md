@@ -11,4 +11,11 @@ from the `index.js` file where:
 * source should be `tinyurl`
 
 ## bitly
-Up next, I am planning on adding a solution for bitly.
+The solution for tinyurl has been written. In order to use it, all you need to do is download this project, include it in your project path and then call:
+`handleRequest(url, source)`
+from the `index.js` file where:
+* `url` is the url you want to shorten
+* source should be `bitly`
+
+###### Kindly do not forget to enter the Bitly API key in the Bitly.js file, else the solution will not work.
+
