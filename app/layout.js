@@ -1,6 +1,6 @@
 import './globals.css';
-import GoogleAnalytics from '../lib/analytics';
-import GoogleAnalyticsTracker from '../lib/analytics-tracker';
+import GoogleAnalytics from './lib/analytics';
+import GoogleAnalyticsTracker from './lib/GoogleAnalyticsTracker';
 
 export const metadata = {
   title: 'BloomShort',
