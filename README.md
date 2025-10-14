@@ -20,23 +20,6 @@ BloomShort is a modern, visually appealing URL shortener built with Next.js (App
 
 ---
 
-## Project Structure
-
-url-shortener/
-├─ app/
-│  ├─ page.js               # Homepage / form
-│  ├─ api/
-│  │  └─ shorten/route.js   # API route to generate short URLs
-│  └─ [code]/page.js        # Redirect page for short URLs
-├─ lib/
-│  ├─ supabase.js           # Client-side Supabase (optional)
-├─ styles/
-│  └─ globals.css           # Tailwind / global styles
-├─ package.json
-└─ README.md
-
----
-
 ## How it works
 
 1. User enters a long URL in the input form on the homepage.
