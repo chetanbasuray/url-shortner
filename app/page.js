@@ -68,7 +68,10 @@ export default function HomePage() {
           transition={{ delay: 1.5 }}
           className="mt-8 text-center text-purple-700 font-semibold"
         >
-          ✨ Your tiny bloom: <a href={short} className="underline">{short}</a>
+          ✨ Your tiny bloom:{" "}
+          <a href={short} target="_blank" rel="noopener noreferrer" className="underline">
+            {short}
+          </a>
         </motion.div>
       )}
     </div>

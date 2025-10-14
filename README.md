@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 🌸 BloomShort – URL Shortener
+
+Live Demo: <https://url-shortner-en2l.vercel.app/>
+
+BloomShort is a modern, visually appealing URL shortener built with Next.js (App Router) and Supabase. It transforms long URLs into tiny, shareable “blooms” with a smooth, playful frontend experience.
+
+---
+
+## Tech Stack
+
+- Frontend: Next.js (App Router), React, Tailwind CSS, Framer Motion for animations
+- Backend / Database: Supabase (PostgreSQL) with Row-Level Security
+- Deployment: Vercel
+- Key Features:
+  - Generate short URLs with a random code
+  - Fully server-side insertion and redirect using Supabase service key
+  - Automatic redirect to original URL
+  - Responsive, animated, flowery frontend design
+  - Short URL opens in a new browser tab
+
+---
+
+## Project Structure
+
+url-shortener/
+├─ app/
+│  ├─ page.js               # Homepage / form
+│  ├─ api/
+│  │  └─ shorten/route.js   # API route to generate short URLs
+│  └─ [code]/page.js        # Redirect page for short URLs
+├─ lib/
+│  ├─ supabase.js           # Client-side Supabase (optional)
+├─ styles/
+│  └─ globals.css           # Tailwind / global styles
+├─ package.json
+└─ README.md
+
+---
+
+## How it works
+
+1. User enters a long URL in the input form on the homepage.
+2. The API (/api/shorten) generates a short random code and inserts it into Supabase.
+3. The generated short URL is displayed. Clicking it opens the destination in a new browser tab.
+4. The [code] page fetches the original URL server-side using Supabase service key and redirects the user.
+
+---
 
 ## Getting Started
 
-First, run the development server:
+1. Clone the repository:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+   git clone <your-repo-url>
+   cd url-shortener
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+   npm install
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. Set up environment variables (.env.local):
 
-## Learn More
+   SUPABASE_URL=<https://your-project.supabase.co>
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key (optional for client access)
 
-To learn more about Next.js, take a look at the following resources:
+4. Run locally:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   npm run dev
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+5. Open <http://localhost:3000> in your browser.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Highlights
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Beautiful Frontend: Flowery animations, gradient backgrounds, playful language.
+- Server-Side Security: Service key keeps database operations secure.
+- Instant Deployment: Fully deployed on Vercel.
+- Client-Friendly Demo: Potential clients and employers can test live at <https://url-shortner-en2l.vercel.app/>
+
+---
+
+## Future Improvements
+
+- Add analytics: number of clicks per short URL.
+- Allow custom short codes.
+- Enhance mobile responsiveness.
+- Add light/dark mode toggle.
