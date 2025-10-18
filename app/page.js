@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { QRCodeCanvas } from 'qrcode.react';
 
 export default function HomePage() {
   const [url, setUrl] = useState('');
@@ -23,7 +24,7 @@ export default function HomePage() {
     if (short) {
       navigator.clipboard.writeText(short);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000); // hide after 2s
+      setTimeout(() => setCopied(false), 2000);
     }
   };
 
@@ -81,7 +82,7 @@ export default function HomePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.5 }}
-          className="mt-8 text-center text-purple-700 font-semibold flex flex-col items-center space-y-2"
+          className="mt-8 text-center text-purple-700 font-semibold flex flex-col items-center space-y-4"
         >
           ✨ Your tiny bloom:{" "}
           <a href={short} target="_blank" rel="noopener noreferrer" className="underline">
@@ -102,19 +103,24 @@ export default function HomePage() {
             </button>
           </div>
 
-          {/* AnimatePresence for disappearing message */}
+          {/* Disappearing copied message */}
           <AnimatePresence>
             {copied && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="mt-2 px-4 py-2 bg-green-400 text-white rounded shadow"
+                className="px-4 py-2 bg-green-400 text-white rounded shadow"
               >
                 ✅ Copied to clipboard!
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* QR Code */}
+          <div className="mt-4">
+            <QRCodeCanvas value={short} size={128} fgColor="#6b21a8" bgColor="transparent" />
+          </div>
         </motion.div>
       )}
     </div>
