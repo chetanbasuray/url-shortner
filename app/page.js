@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function HomePage() {
   const [url, setUrl] = useState('');
   const [short, setShort] = useState('');
+  const [copied, setCopied] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,6 +17,20 @@ export default function HomePage() {
     });
     const data = await res.json();
     if (data.code) setShort(`${window.location.origin}/${data.code}`);
+  };
+
+  const handleCopy = () => {
+    if (short) {
+      navigator.clipboard.writeText(short);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000); // hide after 2s
+    }
+  };
+
+  const handleOpen = () => {
+    if (short) {
+      window.open(short, '_blank');
+    }
   };
 
   return (
@@ -66,12 +81,40 @@ export default function HomePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.5 }}
-          className="mt-8 text-center text-purple-700 font-semibold"
+          className="mt-8 text-center text-purple-700 font-semibold flex flex-col items-center space-y-2"
         >
           ✨ Your tiny bloom:{" "}
           <a href={short} target="_blank" rel="noopener noreferrer" className="underline">
             {short}
           </a>
+          <div className="flex space-x-2 mt-2">
+            <button
+              onClick={handleCopy}
+              className="px-4 py-2 bg-purple-400 text-white rounded hover:bg-purple-500 transition"
+            >
+              Copy
+            </button>
+            <button
+              onClick={handleOpen}
+              className="px-4 py-2 bg-pink-400 text-white rounded hover:bg-pink-500 transition"
+            >
+              Open
+            </button>
+          </div>
+
+          {/* AnimatePresence for disappearing message */}
+          <AnimatePresence>
+            {copied && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="mt-2 px-4 py-2 bg-green-400 text-white rounded shadow"
+              >
+                ✅ Copied to clipboard!
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
       )}
     </div>
