@@ -8,16 +8,26 @@ export default function HomePage() {
   const [url, setUrl] = useState('');
   const [short, setShort] = useState('');
   const [copied, setCopied] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setShort('');
+
     const res = await fetch('/api/shorten', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url }),
     });
     const data = await res.json();
-    if (data.code) setShort(`${window.location.origin}/${data.code}`);
+
+    if (res.ok && data.code) {
+      setShort(`${window.location.origin}/${data.code}`);
+    } else {
+      setError(data.error || 'Something went wrong!');
+      setTimeout(() => setError(''), 4000); // disappear after 4 seconds
+    }
   };
 
   const handleCopy = () => {
@@ -69,13 +79,28 @@ export default function HomePage() {
           required
           className="w-full p-4 rounded-lg shadow-md focus:outline-none focus:ring-4 focus:ring-purple-300 text-purple-900 font-medium"
         />
-        <button
+        <motion.button
           type="submit"
+          whileTap={{ scale: 1.05 }}
           className="px-6 py-3 bg-gradient-to-r from-purple-400 via-pink-400 to-yellow-400 text-white rounded-lg shadow-lg font-bold hover:scale-105 transform transition duration-300"
         >
           🌟 Shorten & Bloom 🌟
-        </button>
+        </motion.button>
       </motion.form>
+
+      {/* Error message */}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="mt-4 px-4 py-2 bg-red-500 text-white rounded shadow"
+          >
+            ⚠️ {error}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {short && (
         <motion.div
@@ -88,22 +113,27 @@ export default function HomePage() {
           <a href={short} target="_blank" rel="noopener noreferrer" className="underline">
             {short}
           </a>
+
           <div className="flex space-x-2 mt-2">
-            <button
+            <motion.button
               onClick={handleCopy}
-              className="px-4 py-2 bg-purple-400 text-white rounded hover:bg-purple-500 transition"
+              whileTap={{ scale: 1.2 }}
+              whileHover={{ scale: 1.1 }}
+              className="px-4 py-2 bg-purple-400 text-white rounded shadow hover:bg-purple-500 transition"
             >
               Copy
-            </button>
-            <button
+            </motion.button>
+            <motion.button
               onClick={handleOpen}
-              className="px-4 py-2 bg-pink-400 text-white rounded hover:bg-pink-500 transition"
+              whileTap={{ scale: 1.2 }}
+              whileHover={{ scale: 1.1 }}
+              className="px-4 py-2 bg-pink-400 text-white rounded shadow hover:bg-pink-500 transition"
             >
               Open
-            </button>
+            </motion.button>
           </div>
 
-          {/* Disappearing copied message */}
+          {/* Copied message */}
           <AnimatePresence>
             {copied && (
               <motion.div
@@ -118,9 +148,14 @@ export default function HomePage() {
           </AnimatePresence>
 
           {/* QR Code */}
-          <div className="mt-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="mt-4"
+          >
             <QRCodeCanvas value={short} size={128} fgColor="#6b21a8" bgColor="transparent" />
-          </div>
+          </motion.div>
         </motion.div>
       )}
     </div>
