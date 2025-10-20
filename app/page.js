@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QRCodeCanvas } from 'qrcode.react';
 
@@ -8,32 +8,63 @@ export default function HomePage() {
   const [url, setUrl] = useState('');
   const [short, setShort] = useState('');
   const [copied, setCopied] = useState(false);
-  const [error, setError] = useState('');
 
+  // UTM parameters
   const [utmSource, setUtmSource] = useState('');
   const [utmMedium, setUtmMedium] = useState('');
   const [utmCampaign, setUtmCampaign] = useState('');
   const [utmTerm, setUtmTerm] = useState('');
   const [utmContent, setUtmContent] = useState('');
 
+  // ✅ Detect existing UTM params in pasted URL and auto-fill them
+  useEffect(() => {
+    try {
+      if (!url) return;
+      const parsed = new URL(url);
+      const params = parsed.searchParams;
+
+      let hasUTMs = false;
+      const utms = {};
+
+      ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'].forEach((key) => {
+        if (params.has(key)) {
+          hasUTMs = true;
+          utms[key] = params.get(key);
+          params.delete(key);
+        }
+      });
+
+      if (hasUTMs) {
+        setUtmSource(utms.utm_source || '');
+        setUtmMedium(utms.utm_medium || '');
+        setUtmCampaign(utms.utm_campaign || '');
+        setUtmTerm(utms.utm_term || '');
+        setUtmContent(utms.utm_content || '');
+
+        // Remove UTM params from URL input
+        const cleanUrl = parsed.origin + parsed.pathname + parsed.hash;
+        setUrl(cleanUrl);
+      }
+    } catch (err) {
+      // ignore invalid URLs
+    }
+  }, [url]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setShort('');
 
-    let fullUrl = url;
+    // Build URL with UTM params if provided
+    let fullUrl = url.trim();
+    const utmParams = new URLSearchParams();
 
-    // Append UTM parameters if provided
-    const params = new URLSearchParams();
-    if (utmSource) params.append('utm_source', utmSource);
-    if (utmMedium) params.append('utm_medium', utmMedium);
-    if (utmCampaign) params.append('utm_campaign', utmCampaign);
-    if (utmTerm) params.append('utm_term', utmTerm);
-    if (utmContent) params.append('utm_content', utmContent);
+    if (utmSource) utmParams.append('utm_source', utmSource);
+    if (utmMedium) utmParams.append('utm_medium', utmMedium);
+    if (utmCampaign) utmParams.append('utm_campaign', utmCampaign);
+    if (utmTerm) utmParams.append('utm_term', utmTerm);
+    if (utmContent) utmParams.append('utm_content', utmContent);
 
-    if ([...params].length > 0) {
-      const separator = url.includes('?') ? '&' : '?';
-      fullUrl += separator + params.toString();
+    if ([...utmParams].length > 0) {
+      fullUrl += (fullUrl.includes('?') ? '&' : '?') + utmParams.toString();
     }
 
     const res = await fetch('/api/shorten', {
@@ -41,34 +72,15 @@ export default function HomePage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url: fullUrl }),
     });
-
     const data = await res.json();
-
-    if (res.ok && data.code) {
-      setShort(`${window.location.origin}/${data.code}`);
-    } else {
-      setError(data.error || 'Something went wrong!');
-      setTimeout(() => setError(''), 4000);
-    }
+    if (data.code) setShort(`${window.location.origin}/${data.code}`);
   };
 
   const handleCopy = () => {
-    if (short) {
-      navigator.clipboard.writeText(short);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
+    navigator.clipboard.writeText(short);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
-
-  const handleOpen = () => {
-    if (short) {
-      window.open(short, '_blank');
-    }
-  };
-
-  // unified input style
-  const inputClass =
-    "w-full p-3 rounded-lg shadow-md focus:outline-none focus:ring-4 focus:ring-purple-300 text-purple-900 font-medium text-lg";
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-pink-200 via-purple-200 to-blue-200 p-8 font-sans">
@@ -76,7 +88,7 @@ export default function HomePage() {
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.8 }}
-        className="text-5xl font-bold text-purple-900 mb-6 text-center"
+        className="text-5xl font-bold text-purple-700 mb-6 text-center"
       >
         🌸 Welcome to BloomShort 🌸
       </motion.h1>
@@ -85,9 +97,9 @@ export default function HomePage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5, duration: 1 }}
-        className="text-lg text-purple-900 mb-10 text-center max-w-lg"
+        className="text-lg text-purple-800 mb-10 text-center max-w-lg"
       >
-        Transform your long URLs into delightful, tiny blossoms! Add UTM parameters to track your marketing campaigns. 🌺
+        Transform your long URLs into delightful, tiny blossoms! Add UTM tags easily or let BloomShort detect them for you. 🌺
       </motion.p>
 
       <motion.form
@@ -103,126 +115,107 @@ export default function HomePage() {
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           required
-          className={inputClass}
+          className="w-full p-4 rounded-lg shadow-md focus:outline-none focus:ring-4 focus:ring-purple-300 text-purple-900 font-medium"
         />
 
-        {/* UTM fields */}
-        <div className="grid grid-cols-2 gap-2 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
           <input
             type="text"
             placeholder="utm_source"
             value={utmSource}
             onChange={(e) => setUtmSource(e.target.value)}
-            className={inputClass}
+            className="p-3 rounded-lg shadow-md focus:outline-none focus:ring-4 focus:ring-purple-300 text-purple-900 font-medium"
           />
           <input
             type="text"
             placeholder="utm_medium"
             value={utmMedium}
             onChange={(e) => setUtmMedium(e.target.value)}
-            className={inputClass}
+            className="p-3 rounded-lg shadow-md focus:outline-none focus:ring-4 focus:ring-purple-300 text-purple-900 font-medium"
           />
           <input
             type="text"
             placeholder="utm_campaign"
             value={utmCampaign}
             onChange={(e) => setUtmCampaign(e.target.value)}
-            className={inputClass}
+            className="p-3 rounded-lg shadow-md focus:outline-none focus:ring-4 focus:ring-purple-300 text-purple-900 font-medium"
           />
           <input
             type="text"
             placeholder="utm_term"
             value={utmTerm}
             onChange={(e) => setUtmTerm(e.target.value)}
-            className={inputClass}
+            className="p-3 rounded-lg shadow-md focus:outline-none focus:ring-4 focus:ring-purple-300 text-purple-900 font-medium"
           />
           <input
             type="text"
             placeholder="utm_content"
             value={utmContent}
             onChange={(e) => setUtmContent(e.target.value)}
-            className={inputClass + ' col-span-2'}
+            className="p-3 rounded-lg shadow-md focus:outline-none focus:ring-4 focus:ring-purple-300 text-purple-900 font-medium"
           />
         </div>
 
         <motion.button
+          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.05 }}
           type="submit"
-          whileTap={{ scale: 1.05 }}
-          className="px-6 py-3 bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-400 text-white rounded-lg shadow-lg font-bold hover:scale-105 transform transition duration-300 text-lg"
+          className="px-6 py-3 bg-gradient-to-r from-purple-400 via-pink-400 to-yellow-400 text-white rounded-lg shadow-lg font-bold transform transition duration-300"
         >
           🌟 Shorten & Bloom 🌟
         </motion.button>
       </motion.form>
 
-      {/* Error message */}
       <AnimatePresence>
-        {error && (
+        {short && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="mt-4 px-4 py-2 bg-red-500 text-white rounded shadow"
+            exit={{ opacity: 0 }}
+            transition={{ delay: 0.3 }}
+            className="mt-8 text-center text-purple-700 font-semibold"
           >
-            ⚠️ {error}
+            ✨ Your tiny bloom:{" "}
+            <a href={short} target="_blank" rel="noopener noreferrer" className="underline">
+              {short}
+            </a>
+            <div className="flex justify-center mt-4 space-x-4">
+              <button
+                onClick={handleCopy}
+                className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition"
+              >
+                📋 Copy
+              </button>
+              <a
+                href={short}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+              >
+                🔗 Open
+              </a>
+            </div>
+
+            <div className="flex justify-center mt-6">
+              <QRCodeCanvas value={short} size={128} bgColor="#ffffff" fgColor="#7e22ce" />
+            </div>
+
+            <AnimatePresence>
+              {copied && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="text-green-600 mt-4"
+                >
+                  ✅ Copied to clipboard!
+                </motion.p>
+              )}
+            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>
-
-      {short && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.5 }}
-          className="mt-8 text-center text-purple-900 font-semibold flex flex-col items-center space-y-4"
-        >
-          ✨ Your tiny bloom:{" "}
-          <a href={short} target="_blank" rel="noopener noreferrer" className="underline">
-            {short}
-          </a>
-
-          <div className="flex space-x-2 mt-2">
-            <motion.button
-              onClick={handleCopy}
-              whileTap={{ scale: 1.2 }}
-              whileHover={{ scale: 1.1 }}
-              className="px-4 py-2 bg-purple-500 text-white rounded shadow hover:bg-purple-600 transition"
-            >
-              Copy
-            </motion.button>
-            <motion.button
-              onClick={handleOpen}
-              whileTap={{ scale: 1.2 }}
-              whileHover={{ scale: 1.1 }}
-              className="px-4 py-2 bg-pink-500 text-white rounded shadow hover:bg-pink-600 transition"
-            >
-              Open
-            </motion.button>
-          </div>
-
-          {/* Copied message */}
-          <AnimatePresence>
-            {copied && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="px-4 py-2 bg-green-500 text-white rounded shadow"
-              >
-                ✅ Copied to clipboard!
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* QR Code */}
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="mt-4"
-          >
-            <QRCodeCanvas value={short} size={128} bgColor="#fdf6ff" fgColor="#6b21a8" />
-          </motion.div>
-        </motion.div>
-      )}
     </div>
   );
 }
