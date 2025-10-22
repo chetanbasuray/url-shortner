@@ -10,8 +10,16 @@ function generateCode(length = 6) {
   return code;
 }
 
+function generateSuggestions(base) {
+  const suggestions = [];
+  for (let i = 0; i < 3; i++) {
+    suggestions.push(`${base}${Math.floor(Math.random() * 1000)}`);
+  }
+  return suggestions;
+}
+
 export async function POST(req) {
-  const { url } = await req.json();
+  const { url, customCode } = await req.json();
   if (!url) return new Response(JSON.stringify({ error: 'No URL provided' }), { status: 400 });
 
   // --- URL Safety Check ---
@@ -40,15 +48,26 @@ export async function POST(req) {
     }
   } catch (err) {
     console.error('Safety check error:', err);
-    // Fail open: allow shortening if API fails
   }
 
-  // --- Generate unique code ---
-  let code = generateCode();
-  let { data } = await supabase.from('urls').select('code').eq('code', code);
-  while (data.length > 0) {
-    code = generateCode();
-    ({ data } = await supabase.from('urls').select('code').eq('code', code));
+  // --- Handle custom short code ---
+  let code = customCode ? customCode.trim() : generateCode();
+
+  let { data: existing } = await supabase.from('urls').select('code').eq('code', code);
+
+  if (existing.length > 0) {
+    if (customCode) {
+      const suggestions = generateSuggestions(customCode);
+      return new Response(
+        JSON.stringify({ error: 'Short code already taken.', suggestions }),
+        { status: 409 }
+      );
+    } else {
+      while (existing.length > 0) {
+        code = generateCode();
+        ({ data: existing } = await supabase.from('urls').select('code').eq('code', code));
+      }
+    }
   }
 
   const { error } = await supabase.from('urls').insert([{ code, original: url }]);
