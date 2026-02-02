@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QRCodeCanvas } from 'qrcode.react';
 
@@ -105,6 +106,12 @@ export default function HomePage() {
       >
         🌸 BloomShort 🌸
       </motion.h1>
+      <Link
+        href="/utm"
+        className="mb-6 text-purple-700 underline font-semibold hover:text-purple-900 transition"
+      >
+        Build a UTM tracking URL →
+      </Link>
 
       <motion.form
         onSubmit={handleSubmit}
