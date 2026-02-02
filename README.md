@@ -1,6 +1,6 @@
 # 🌸 BloomShort – URL Shortener
 
-Live Demo: <https://url-shortner-en2l.vercel.app/>
+Live Demo: <https://bloomshort.simplifymylife.app>
 
 BloomShort is a modern, visually appealing URL shortener built with Next.js (App Router) and Supabase. It transforms long URLs into tiny, shareable “blooms” with a smooth, playful frontend experience. Users can also add UTM parameters for marketing tracking, copy short URLs to clipboard, open them in a new tab, and generate QR codes for sharing.
 
@@ -74,7 +74,7 @@ BloomShort is a modern, visually appealing URL shortener built with Next.js (App
 - **QR Codes:** Instant QR code generation for every short URL.
 - **Clipboard & Open Buttons:** Easy sharing and navigation.
 - **Server-Side Security:** Supabase service key keeps database operations secure.
-- **Client-Friendly Demo:** Potential clients and employers can test live at <https://url-shortner-en2l.vercel.app/>
+- **Client-Friendly Demo:** Potential clients and employers can test live at <https://bloomshort.simplifymylife.app>
 
 ---
 
